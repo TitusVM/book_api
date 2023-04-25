@@ -16,11 +16,17 @@ import lombok.Setter;
 
 @Entity(name = "book")
 @Table(name = "books")
-@AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
 public class Book {
+
+	public Book(String author, String name, String editor, LocalDate release) {
+		this.author = author;
+		this.name = name;
+		this.editor = editor;
+		this.release = release;
+	}
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)

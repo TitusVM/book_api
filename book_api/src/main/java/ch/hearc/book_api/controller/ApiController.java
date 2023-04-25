@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -59,7 +60,7 @@ public class ApiController {
 		}
 	}
 
-	@GetMapping("/book/{id}")
+	@GetMapping("/books/{id}")
 	public ResponseEntity<BookResponse> showBook(@PathVariable("id") int id) throws URISyntaxException { // insert
 		// Id starts at 1
 		HttpHeaders responseHeader = new HttpHeaders();
@@ -81,33 +82,49 @@ public class ApiController {
 		}
 	}
 
-	@PostMapping("/book")
-	public ResponseEntity<String> newBook(@RequestBody Book book) {
+	@PostMapping("/books")
+	public ResponseEntity<BookResponse> newBook(@RequestBody Book book) {
 		HttpHeaders responseHeader = new HttpHeaders();
 		try {
 			book = catalogService.createBook(book);
-			URI location = new URI("/book/" + book.getId());
+			URI location = new URI("/books/" + book.getId());
 			responseHeader.setLocation(location);
-			return new ResponseEntity<String>("Book stored successfully", responseHeader, HttpStatus.ACCEPTED);
+			System.out.println("Created");
+			return new ResponseEntity<BookResponse>(new BookResponse(book), responseHeader, HttpStatus.ACCEPTED);
+		} catch (NoSuchElementException e) {
+			return new ResponseEntity<BookResponse>(null, responseHeader, HttpStatus.NOT_FOUND);
 		} catch (Exception e) {
-			// Isn't called if there is an error in the json
-			return new ResponseEntity<String>(e.getMessage(), responseHeader, HttpStatus.BAD_REQUEST);
+			return new ResponseEntity<BookResponse>(null, responseHeader, HttpStatus.I_AM_A_TEAPOT);
 		}
 	}
 
-	@PutMapping("/book/{id}")
+	@PutMapping("/books/{id}")
 	public ResponseEntity<String> replaceBook(@RequestBody Book book, @PathVariable("id") long id) {
 		HttpHeaders responseHeader = new HttpHeaders();
 		try {
 			// if no books have this id a new one is created
 			book.setId(id);
 			book = catalogService.createBook(book);
-			URI location = new URI("/book/" + book.getId());
+			URI location = new URI("/books/" + book.getId());
 			responseHeader.setLocation(location);
-			return new ResponseEntity<String>("Book stored successfully", responseHeader, HttpStatus.ACCEPTED);
+			return new ResponseEntity<String>("Book replaced successfully", responseHeader, HttpStatus.ACCEPTED);
+		} catch (NoSuchElementException e) {
+			return new ResponseEntity<String>("No such book", responseHeader, HttpStatus.NOT_FOUND);
 		} catch (Exception e) {
-			// Isn't called if there is an error in the json
-			return new ResponseEntity<String>(e.getMessage(), responseHeader, HttpStatus.BAD_REQUEST);
+			return new ResponseEntity<String>("Why are you like this ?", responseHeader, HttpStatus.I_AM_A_TEAPOT);
+		}
+	}
+
+	@DeleteMapping("/books/{id}")
+	public ResponseEntity<String> deleteBook(@PathVariable("id") long id) {
+		HttpHeaders responseHeader = new HttpHeaders();
+		try {
+			catalogService.deleteBook(id);
+			return new ResponseEntity<String>("Book deleted successfully", responseHeader, HttpStatus.ACCEPTED);
+		} catch (NoSuchElementException e) {
+			return new ResponseEntity<String>("No such book", responseHeader, HttpStatus.NOT_FOUND);
+		} catch (Exception e) {
+			return new ResponseEntity<String>("Why are you like this ?", responseHeader, HttpStatus.I_AM_A_TEAPOT);
 		}
 	}
 }

@@ -1,7 +1,9 @@
 package ch.hearc.book_api.service;
 
 import java.util.List;
+import java.util.concurrent.BlockingQueue;
 
+import ch.hearc.book_api.jms.log_producer.Log;
 import ch.hearc.book_api.model.Book;
 
 public interface CatalogService {
@@ -16,5 +18,7 @@ public interface CatalogService {
 	public void deleteBook(Long id);
 
 	public Book getBookById(Long id);
+
+	public BlockingQueue<Log> getLogs();
 
 }
